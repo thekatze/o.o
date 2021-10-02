@@ -1,5 +1,8 @@
 name: "godot-ci export"
-on: push
+on:
+  push:
+    branch:
+      - 'master'
 
 env:
   GODOT_VERSION: 3.3.3
@@ -7,7 +10,7 @@ env:
 
 jobs:
   export-windows:
-    name: Windows Export
+    name: Build Windows
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:3.3.3
@@ -27,55 +30,73 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: windows
+          name: ${EXPORT_NAME}-windows
           path: build/windows
 
-  # export-linux:
-  #   name: Linux Export
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: barichello/godot-ci:3.3.3
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         lfs: true
-  #     - name: Setup
-  #       run: |
-  #         mkdir -v -p ~/.local/share/godot/templates
-  #         mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
-  #     - name: Linux Build
-  #       run: |
-  #         mkdir -v -p build/linux
-  #         cd $EXPORT_NAME
-  #         godot -v --export "Linux" ../build/linux/$EXPORT_NAME.x86_64
-  #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: linux
-  #         path: build/linux
+  export-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:3.3.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Setup
+        run: |
+          mkdir -v -p ~/.local/share/godot/templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
+      - name: Linux Build
+        run: |
+          mkdir -v -p build/linux
+          godot -v --export "Linux" ./build/linux/$EXPORT_NAME.out
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${EXPORT_NAME}-linux
+          path: build/linux
 
-  # export-mac:
-  #   name: Mac Export
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: barichello/godot-ci:3.3.3
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         lfs: true
-  #     - name: Setup
-  #       run: |
-  #         mkdir -v -p ~/.local/share/godot/templates
-  #         mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
-  #     - name: Mac Build
-  #       run: |
-  #         mkdir -v -p build/mac
-  #         cd $EXPORT_NAME
-  #         godot -v --export "Mac" ../build/mac/$EXPORT_NAME.zip
-  #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: mac
-  #         path: build/mac
+  export-mac:
+    name: Build Mac
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:3.3.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Setup
+        run: |
+          mkdir -v -p ~/.local/share/godot/templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
+      - name: Mac Build
+        run: |
+          mkdir -v -p build/mac
+          godot -v --export "Mac" ./build/mac/$EXPORT_NAME.zip
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ EXPORT_NAME }}-mac
+          path: build/mac
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y.%m.%d-%H%M%S')"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.date.outputs.date }}
+          body: |
+            Automated release
+          draft: false
+          prerelease: false

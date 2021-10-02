@@ -134,3 +134,12 @@ jobs:
           tag_name: ${{ steps.date.outputs.date }}
           files: |
             *.zip
+
+      - name: Cleanup artifacts
+        if: ${{ always() }}
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            ${{ env.EXPORT_NAME }}-windows
+            ${{ env.EXPORT_NAME }}-linux
+            ${{ env.EXPORT_NAME }}-mac

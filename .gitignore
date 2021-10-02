@@ -4,4 +4,5 @@
 # Binaries
 bin/
 build/
+export/
 lib/

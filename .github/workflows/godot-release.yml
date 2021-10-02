@@ -78,7 +78,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ EXPORT_NAME }}-mac
+          name: ${EXPORT_NAME}-mac
           path: build/mac
 
   create-release:

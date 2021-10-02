@@ -2,7 +2,7 @@ name: "godot-ci export"
 on:
   push:
     branch:
-      - 'master'
+      - "master"
 
 env:
   GODOT_VERSION: 3.3.3
@@ -114,4 +114,6 @@ jobs:
           name: ${{ steps.date.outputs.date }}
           tag_name: ${{ steps.date.outputs.date }}
           files:
-            - ${EXPORT_NAME}.*
+            - ${EXPORT_NAME}.zip
+            - ${EXPORT_NAME}.exe
+            - ${EXPORT_NAME}.out

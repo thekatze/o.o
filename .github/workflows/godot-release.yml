@@ -113,7 +113,7 @@ jobs:
         with:
           name: ${{ steps.date.outputs.date }}
           tag_name: ${{ steps.date.outputs.date }}
-          files:
-            - ${EXPORT_NAME}.zip
-            - ${EXPORT_NAME}.exe
-            - ${EXPORT_NAME}.out
+          files: |
+            ${EXPORT_NAME}.zip
+            ${EXPORT_NAME}.exe
+            ${EXPORT_NAME}.out
